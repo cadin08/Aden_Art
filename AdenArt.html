@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<link rel="icon" type="image/png" href="https://images.vexels.com/media/users/3/189101/isolated/preview/693f7da0ef1625c6b281f1428a7ecdbb-fuegos-artificiales-de-2-anillos-degradado-verde.png?w=360">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aden Art - Filtros Avanzados</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  /* Fondo general y tipografía */
+  body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #0a0a0a, #1f1f1f);
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 2rem;
+  }
+
+  /* Contenedor principal */
+  .container {
+    background: rgba(20,20,20,0.95);
+    border-radius: 25px;
+    padding: 2.5rem;
+    max-width: 750px;
+    width: 100%;
+    box-shadow: 0 0 50px rgba(0,255,213,0.4);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0,255,213,0.2);
+    transition: all 0.3s ease;
+  }
+
+  h1 {
+    text-align: center;
+    margin-bottom: 2rem;
+    font-weight: 700;
+    color: #00ffd5;
+    letter-spacing: 1.5px;
+    font-size: 2rem;
+    text-shadow: 0 0 10px #00ffd5;
+  }
+
+  /* Estilo de selects y botón */
+  select, button {
+    width: 100%;
+    padding: 0.9rem;
+    margin: 0.6rem 0;
+    border-radius: 15px;
+    border: none;
+    font-size: 1rem;
+    background: rgba(34,34,34,0.8);
+    color: #fff;
+    transition: 0.3s;
+  }
+
+  select:hover, button:hover {
+    background: rgba(0,255,213,0.2);
+    color: #00ffd5;
+    transform: scale(1.02);
+  }
+
+  button {
+    background: #00ffd5;
+    color: #000;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* Salida de la imagen */
+  .output {
+    margin-top: 2rem;
+    text-align: center;
+    min-height: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 2px dashed rgba(0,255,213,0.3);
+    border-radius: 20px;
+    padding: 1rem;
+    transition: 0.3s;
+  }
+
+  .output img {
+    max-width: 100%;
+    border-radius: 20px;
+    box-shadow: 0 0 40px rgba(0,255,213,0.5);
+    animation: fadeIn 0.6s ease-in-out;
+  }
+
+  .loading {
+    color: #00ffd5;
+    font-weight: 600;
+    font-size: 1.2rem;
+    margin-top: 1rem;
+    text-align: center;
+    animation: blink 1s infinite;
+  }
+
+  @keyframes blink {
+    0%, 50%, 100% { opacity: 1; }
+    25%, 75% { opacity: 0.3; }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Aden Art</h1>
+
+  <!-- Filtros Avanzados -->
+  <select id="style">
+    <option value="digital art">Arte digital</option>
+    <option value="photorealistic">Fotorealista</option>
+    <option value="anime">Anime</option>
+    <option value="cyberpunk">Cyberpunk</option>
+    <option value="fantasy">Fantasía</option>
+    <option value="concept art">Concept Art</option>
+    <option value="illustration">Ilustración</option>
+  </select>
+
+  <select id="lighting">
+    <option value="natural light">Luz natural</option>
+    <option value="dramatic lighting">Iluminación dramática</option>
+    <option value="neon lights">Luces de neón</option>
+    <option value="soft light">Luz suave</option>
+    <option value="cinematic lighting">Cinemática</option>
+    <option value="ambient lighting">Ambiental</option>
+  </select>
+
+  <select id="environment">
+    <option value="urban">Urbano</option>
+    <option value="forest">Bosque</option>
+    <option value="space">Espacio</option>
+    <option value="underwater">Submarino</option>
+    <option value="fantasy world">Mundo de fantasía</option>
+    <option value="desert">Desierto</option>
+    <option value="mountains">Montañas</option>
+  </select>
+
+  <select id="emotion">
+    <option value="">Neutral</option>
+    <option value="happy">Feliz</option>
+    <option value="sad">Triste</option>
+    <option value="angry">Enfadado</option>
+    <option value="mysterious">Misterioso</option>
+    <option value="epic">Épico</option>
+  </select>
+
+  <select id="camera">
+    <option value="">Plano estándar</option>
+    <option value="close-up">Primer plano</option>
+    <option value="wide shot">Plano general</option>
+    <option value="aerial view">Vista aérea</option>
+    <option value="macro">Macro</option>
+    <option value="panoramic">Panorámica</option>
+  </select>
+
+  <select id="color">
+    <option value="">Colores estándar</option>
+    <option value="warm colors">Colores cálidos</option>
+    <option value="cool colors">Colores fríos</option>
+    <option value="neon colors">Colores neón</option>
+    <option value="monochrome">Monocromo</option>
+  </select>
+
+  <select id="mood">
+    <option value="">Estado de ánimo estándar</option>
+    <option value="dramatic">Dramático</option>
+    <option value="romantic">Romántico</option>
+    <option value="mysterious">Misterioso</option>
+    <option value="fantasy">Fantástico</option>
+  </select>
+
+  <button id="generateBtn">Generar Imagen</button>
+  <div class="loading" id="loading" style="display:none;">Generando imagen...</div>
+  <div class="output" id="output"></div>
+</div>
+
+<script>
+const generateBtn = document.getElementById('generateBtn');
+const outputDiv = document.getElementById('output');
+const loadingText = document.getElementById('loading');
+
+const styleSelect = document.getElementById('style');
+const lightingSelect = document.getElementById('lighting');
+const environmentSelect = document.getElementById('environment');
+const emotionSelect = document.getElementById('emotion');
+const cameraSelect = document.getElementById('camera');
+const colorSelect = document.getElementById('color');
+const moodSelect = document.getElementById('mood');
+
+// Simulación de Aden IA
+async function adenIA(filters) {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      const randomId = Math.floor(Math.random() * 1000);
+      resolve(`https://picsum.photos/seed/${randomId}/512/512`);
+    }, 1500);
+  });
+}
+
+generateBtn.addEventListener('click', async () => {
+  const filters = {
+    style: styleSelect.value,
+    lighting: lightingSelect.value,
+    environment: environmentSelect.value,
+    emotion: emotionSelect.value,
+    camera: cameraSelect.value,
+    color: colorSelect.value,
+    mood: moodSelect.value
+  };
+
+  // Construir prompt completo para IA
+  let fullPrompt = `Imagen generada con estilo: ${filters.style}`;
+  fullPrompt += filters.lighting ? `, iluminación: ${filters.lighting}` : "";
+  fullPrompt += filters.environment ? `, entorno: ${filters.environment}` : "";
+  fullPrompt += filters.emotion ? `, emoción: ${filters.emotion}` : "";
+  fullPrompt += filters.camera ? `, plano: ${filters.camera}` : "";
+  fullPrompt += filters.color ? `, color: ${filters.color}` : "";
+  fullPrompt += filters.mood ? `, estado de ánimo: ${filters.mood}` : "";
+
+  outputDiv.innerHTML = "";
+  loadingText.style.display = "block";
+
+  try {
+    const imageUrl = await adenIA(filters);
+    outputDiv.innerHTML = `<img src="${imageUrl}" alt="Imagen generada">`;
+  } catch (err) {
+    console.error(err);
+    alert("Error al generar la imagen.");
+  } finally {
+    loadingText.style.display = "none";
+  }
+});
+</script>
+</body>
+</html>
+
+
+

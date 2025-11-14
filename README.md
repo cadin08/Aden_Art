@@ -1,5 +1,5 @@
 # Aden_Art
-Aden Art es la IA de arte echa para crear imagenes
+Aden Art es un servicio de generacion de imagenes con IA 
 
 
 © 2025 Hodei Arranz / Cadin. Todos los derechos reservados.

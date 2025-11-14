@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Aden Art V2</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <meta name="color-scheme" content="dark">
+  <style>
+    :root{
+      --glass-bg: rgba(12,14,18,0.35);
+      --glass-border: rgba(255,255,255,0.06);
+      --accent-1: #00ffd5; /* cyan */
+      --accent-2: #3eff8a; /* green */
+      --neon-shadow: 0 0 18px rgba(0,255,213,0.12), 0 0 60px rgba(0,120,255,0.04);
+      --glass-radius: 16px;
+      --glass-padding: 18px;
+      --glass-blur: 10px;
+      --ui-width: 840px;
+      --sidebar-width: 220px;
+      --glass-border-strong: rgba(255,255,255,0.09);
+    }
+
+    html,body{height:100%;}
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: radial-gradient(ellipse at 10% 10%, rgba(0,200,255,0.04), transparent 6%),
+                  radial-gradient(ellipse at 90% 90%, rgba(80,255,160,0.03), transparent 8%),
+                  linear-gradient(180deg,#040409 0%, #0f1114 100%);
+      color: #e9f6f2;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 28px;
+      gap: 18px;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    /* Layout */
+    .app{
+      width: calc(var(--ui-width) + var(--sidebar-width) + 40px);
+      max-width: calc(100% - 56px);
+      display: flex;
+      gap: 18px;
+      align-items: flex-start;
+    }
+
+    /* Contenedor principal (mantiene la funcionalidad original) */
+    .container {
+      width: var(--ui-width);
+      background: linear-gradient(180deg, rgba(18,20,24,0.45), rgba(10,12,15,0.35));
+      border-radius: 20px;
+      padding: 22px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.6), var(--neon-shadow);
+      backdrop-filter: blur(var(--glass-blur)) saturate(1.05);
+      border: 1px solid var(--glass-border);
+      position: relative;
+      overflow: visible;
+    }
+
+    header.app-header{
+      display:flex;align-items:center;gap:12px;margin-bottom:12px;
+    }
+
+    h1 {
+      margin: 0;
+      font-weight: 700;
+      color: var(--accent-1);
+      letter-spacing: 1.2px;
+      font-size: 1.7rem;
+      text-shadow: 0 0 12px rgba(0,255,213,0.12);
+    }
+
+    /* Ventanas "cristal templado" flotantes */
+    .glass-window{
+      border-radius: var(--glass-radius);
+      padding: var(--glass-padding);
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border: 1px solid var(--glass-border-strong);
+      box-shadow: 0 6px 30px rgba(0,0,0,0.6), 0 0 20px rgba(0,255,213,0.03);
+      backdrop-filter: blur(var(--glass-blur)) saturate(1.05);
+    }
+
+    /* Grid controls */
+    .controls{
+      display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:8px;
+    }
+
+    select, button, input{
+      width:100%;padding:12px;border-radius:12px;border:none;background:rgba(12,14,16,0.5);color:#eafff5;font-size:0.95rem;outline:none;
+    }
+    select:focus, input:focus{box-shadow:0 0 20px rgba(0,255,214,0.06);}
+
+    button.primary{
+      background: linear-gradient(90deg,var(--accent-1),var(--accent-2));color:#001; font-weight:700; cursor:pointer;border-radius:12px;border:none;padding:12px;
+      box-shadow: 0 6px 24px rgba(0,255,213,0.08);
+    }
+
+    /* Output area (imagen generada) */
+    .output {
+      margin-top: 16px;
+      min-height: 320px;
+      border-radius: 14px;
+      display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;
+      border: 1px dashed rgba(0,255,213,0.08);
+    }
+
+    .output img{
+      max-width:100%;max-height:100%;border-radius:12px;box-shadow:0 18px 80px rgba(0,0,0,0.7), 0 0 60px rgba(0,255,213,0.05);
+      transition:transform .45s cubic-bezier(.2,.9,.25,1), filter .35s;transform-origin:center;filter:drop-shadow(0 10px 40px rgba(0,0,0,0.6));
+    }
+
+    .loading{position:absolute;top:12px;left:12px;background:rgba(0,0,0,0.45);padding:8px 12px;border-radius:10px;font-weight:600;color:var(--accent-1);} 
+
+    /* Animación cristal liquido: capa superior con filtro SVG para distorsión */
+    .liquid-layer{
+      pointer-events:none;position:absolute;inset:0;border-radius:14px;mix-blend-mode:overlay;opacity:0.45;filter:brightness(1.05);
+    }
+
+    /* Efecto brillo neon en bordes */
+    .accent-edge{position:absolute;inset:0;border-radius:14px;padding:2px;box-shadow:inset 0 0 40px rgba(0,255,213,0.04);}
+
+    /* Side bar - biblioteca */
+    .sidebar{
+      width:var(--sidebar-width);
+      min-height:420px;
+      display:flex;flex-direction:column;gap:12px;align-items:stretch;
+      position:relative;
+    }
+
+    .library{display:flex;flex-direction:column;gap:8px;}
+    .library .thumb{
+      height:80px;border-radius:10px;overflow:hidden;background:linear-gradient(180deg,rgba(0,0,0,0.3),rgba(255,255,255,0.02));display:flex;align-items:center;justify-content:center;position:relative;border:1px solid rgba(255,255,255,0.03);
+    }
+    .thumb img{height:100%;width:auto;object-fit:cover;display:block}
+    .thumb .meta{position:absolute;right:6px;top:6px;background:rgba(0,0,0,0.45);padding:4px 6px;border-radius:8px;font-size:11px}
+
+    .library-actions{display:flex;gap:8px}
+    .small{padding:8px;border-radius:10px;background:rgba(12,14,16,0.55);font-weight:600}
+
+    /* Account menu */
+    .account-box{display:flex;gap:8px;align-items:center;margin-left:auto}
+    .avatar{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--accent-1),var(--accent-2));display:flex;align-items:center;justify-content:center;font-weight:700;color:#001}
+
+    /* Modal */
+    .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:linear-gradient(rgba(0,0,0,0.35),rgba(0,0,0,0.55));z-index:50}
+    .modal.show{display:flex}
+    .modal .card{width:420px;padding:18px;border-radius:14px}
+
+    /* Responsive */
+    @media (max-width:1100px){
+      :root{--ui-width:640px}
+      .app{flex-direction:column;align-items:center}
+      .sidebar{width:100%;max-width:var(--ui-width)}
+    }
+
+  </style>
+
+  <!-- SVG filters para distorsión realista (cristal templado que distorsiona lo que hay detrás) -->
+  <svg width="0" height="0" style="position:absolute">
+    <filter id="liquid-distort">
+      <feTurbulence baseFrequency="0.9" numOctaves="2" seed="2" result="turb" />
+      <feDisplacementMap in="SourceGraphic" in2="turb" scale="18" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </svg>
+</head>
+<body>
+  <div class="app">
+
+    <div class="container glass-window" id="main">
+      <header class="app-header">
+        <h1>Aden Art V2</h1>
+        <div class="account-box">
+          <div id="userGreeting" style="font-size:0.95rem;color: #cfeee6">Invitado</div>
+          <div class="avatar" id="avatarBtn">U</div>
+        </div>
+      </header>
+
+      <div class="controls glass-window" style="background:transparent;border:none;padding:0;">
+        <!-- Mantengo todos los selects sin cambiar su funcionamiento -->
+        <select id="style">
+          <option value="digital art">Arte digital</option>
+          <option value="photorealistic">Fotorealista</option>
+          <option value="anime">Anime</option>
+          <option value="cyberpunk">Cyberpunk</option>
+          <option value="fantasy">Fantasía</option>
+          <option value="concept art">Concept Art</option>
+          <option value="illustration">Ilustración</option>
+        </select>
+
+        <select id="lighting">
+          <option value="natural light">Luz natural</option>
+          <option value="dramatic lighting">Iluminación dramática</option>
+          <option value="neon lights">Luces de neón</option>
+          <option value="soft light">Luz suave</option>
+          <option value="cinematic lighting">Cinemática</option>
+          <option value="ambient lighting">Ambiental</option>
+        </select>
+
+        <select id="environment">
+          <option value="urban">Urbano</option>
+          <option value="forest">Bosque</option>
+          <option value="space">Espacio</option>
+          <option value="underwater">Submarino</option>
+          <option value="fantasy world">Mundo de fantasía</option>
+          <option value="desert">Desierto</option>
+          <option value="mountains">Montañas</option>
+        </select>
+
+        <select id="emotion">
+          <option value="">Neutral</option>
+          <option value="happy">Feliz</option>
+          <option value="sad">Triste</option>
+          <option value="angry">Enfadado</option>
+          <option value="mysterious">Misterioso</option>
+          <option value="epic">Épico</option>
+        </select>
+
+        <select id="camera">
+          <option value="">Plano estándar</option>
+          <option value="close-up">Primer plano</option>
+          <option value="wide shot">Plano general</option>
+          <option value="aerial view">Vista aérea</option>
+          <option value="macro">Macro</option>
+          <option value="panoramic">Panorámica</option>
+        </select>
+
+        <select id="color">
+          <option value="">Colores estándar</option>
+          <option value="warm colors">Colores cálidos</option>
+          <option value="cool colors">Colores fríos</option>
+          <option value="neon colors">Colores neón</option>
+          <option value="monochrome">Monocromo</option>
+        </select>
+
+        <select id="mood">
+          <option value="">Estado de ánimo estándar</option>
+          <option value="dramatic">Dramático</option>
+          <option value="romantic">Romántico</option>
+          <option value="mysterious">Misterioso</option>
+          <option value="fantasy">Fantástico</option>
+        </select>
+      </div>
+
+      <div style="display:flex;gap:12px;margin-top:12px;align-items:center">
+        <button class="primary" id="generateBtn">Generar Imagen</button>
+        <button class="small" id="saveLocalBtn" title="Descargar la imagen visible">Descargar actual</button>
+        <div style="flex:1"></div>
+      </div>
+
+      <div class="output glass-window" id="output">
+        <div class="loading" id="loading" style="display:none">Generando imagen...</div>
+        <!-- Capa que aplicará la distorsión - cristal templado -->
+        <div class="liquid-layer" style="filter:url(#liquid-distort);background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.02));mix-blend-mode:overlay;pointer-events:none"></div>
+
+        <!-- Contenedor donde aparecerá la imagen -->
+      </div>
+
+      <div style="margin-top:12px;display:flex;gap:10px;align-items:center">
+        <div style="font-size:0.9rem;color: #bfeee1">Biblioteca local →</div>
+        <div id="librarySummary" style="font-weight:700">0 imágenes</div>
+      </div>
+
+    </div>
+
+    <!-- Sidebar: biblioteca local y menus de gestión de cuenta -->
+    <aside class="sidebar glass-window">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-weight:700">Biblioteca</div>
+        <div class="small" id="clearLibrary">Limpiar</div>
+      </div>
+      <div class="library" id="libraryList">
+        <!-- thumbnails aquí -->
+      </div>
+      <div style="margin-top:auto;display:flex;flex-direction:column;gap:8px">
+        <div style="font-size:0.85rem;color:#bfeee1">Cuenta</div>
+        <div style="display:flex;gap:8px;">
+          <input id="accountName" placeholder="Nombre de usuario" />
+          <button id="saveAccount" class="small">Guardar</button>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button id="exportAll" class="small">Exportar todo</button>
+          <button id="importBtn" class="small">Importar (dataURL)</button>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- Modal simple para gestión de cuenta / login falso -->
+  <div class="modal" id="modal">
+    <div class="card glass-window">
+      <h3 style="margin-top:0">Gestión de cuenta (local)</h3>
+      <p style="margin:6px 0 12px 0;font-size:0.95rem;color:#bfeee1">Cuentas locales guardadas en tu equipo. No hay autenticación remota.</p>
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <input id="acctName" placeholder="Nombre" />
+        <button id="acctSave" class="small">Crear/Actualizar</button>
+      </div>
+      <div style="display:flex;gap:8px">
+        <select id="acctList"></select>
+        <button id="acctLoad" class="small">Cargar</button>
+        <button id="acctDelete" class="small">Borrar</button>
+      </div>
+      <div style="text-align:right;margin-top:12px">
+        <button id="closeModal" class="small">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Mantengo adenIA exactamente como estaba (simulación)
+    async function adenIA(filters) {
+      return new Promise(resolve => {
+        setTimeout(() => {
+          const randomId = Math.floor(Math.random() * 1000);
+          resolve(`https://picsum.photos/seed/${randomId}/1024/768`);
+        }, 1500);
+      });
+    }
+
+    // ===== IndexedDB helper mínimo para guardar dataURLs con metadatos =====
+    const DB_NAME = 'aden_art_local_db_v1';
+    const STORE_NAME = 'images';
+    function openDB(){
+      return new Promise((res,rej)=>{
+        const r = indexedDB.open(DB_NAME,1);
+        r.onupgradeneeded = ()=>{
+          const db = r.result;
+          if(!db.objectStoreNames.contains(STORE_NAME)){
+            const store = db.createObjectStore(STORE_NAME,{keyPath:'id'});
+            store.createIndex('created', 'created', {unique:false});
+          }
+        }
+        r.onsuccess = ()=>res(r.result);
+        r.onerror = ()=>rej(r.error);
+      })
+    }
+
+    async function saveImageToDB(id, dataURL, meta){
+      const db = await openDB();
+      return new Promise((res,rej)=>{
+        const tx = db.transaction(STORE_NAME,'readwrite');
+        const store = tx.objectStore(STORE_NAME);
+        const item = {id, dataURL, meta, created: Date.now()};
+        store.put(item);
+        tx.oncomplete = ()=>{res(item)};
+        tx.onerror = ()=>rej(tx.error);
+      })
+    }
+
+    async function listImages(){
+      const db = await openDB();
+      return new Promise((res,rej)=>{
+        const tx = db.transaction(STORE_NAME,'readonly');
+        const store = tx.objectStore(STORE_NAME);
+        const req = store.getAll();
+        req.onsuccess = ()=>res(req.result);
+        req.onerror = ()=>rej(req.error);
+      })
+    }
+
+    async function deleteAllImages(){
+      const db = await openDB();
+      return new Promise((res,rej)=>{
+        const tx = db.transaction(STORE_NAME,'readwrite');
+        const store = tx.objectStore(STORE_NAME);
+        const req = store.clear();
+        req.onsuccess = ()=>res();
+        req.onerror = ()=>rej(req.error);
+      })
+    }
+
+    // ===== Utilities =====
+    function serialPrompt(filters){
+      let p = `Imagen generada con estilo: ${filters.style}`;
+      p += filters.lighting ? `, iluminación: ${filters.lighting}` : '';
+      p += filters.environment ? `, entorno: ${filters.environment}` : '';
+      p += filters.emotion ? `, emoción: ${filters.emotion}` : '';
+      p += filters.camera ? `, plano: ${filters.camera}` : '';
+      p += filters.color ? `, color: ${filters.color}` : '';
+      p += filters.mood ? `, estado de ánimo: ${filters.mood}` : '';
+      return p;
+    }
+
+    async function fetchImageAsDataURL(url){
+      // Algunos dominios pueden bloquear fetch; si falla, devolvemos la URL directa
+      try{
+        const res = await fetch(url, {mode:'cors'});
+        const blob = await res.blob();
+        return await new Promise((resolve,reject)=>{
+          const fr = new FileReader();
+          fr.onload = ()=>resolve(fr.result);
+          fr.onerror = reject;
+          fr.readAsDataURL(blob);
+        });
+      }catch(e){
+        console.warn('No se pudo convertir la imagen a dataURL (CORS?), se guardará la URL en su lugar.', e);
+        return url; // fallback: guardamos la URL
+      }
+    }
+
+    // ===== DOM + lógica =====
+    const generateBtn = document.getElementById('generateBtn');
+    const outputDiv = document.getElementById('output');
+    const loadingText = document.getElementById('loading');
+
+    const selects = ['style','lighting','environment','emotion','camera','color','mood'].reduce((acc,id)=>{acc[id]=document.getElementById(id);return acc;},{})
+
+    function setLoading(v){loadingText.style.display = v? 'block':'none';}
+
+    async function renderImageElement(src){
+      outputDiv.querySelectorAll('img.displayed').forEach(n=>n.remove());
+      const img = document.createElement('img');
+      img.classList.add('displayed');
+      img.src = src;
+      img.alt = 'Imagen generada';
+      img.onload = ()=>{img.style.transform='scale(1)'};
+      img.style.transform='scale(0.98)';
+      outputDiv.appendChild(img);
+    }
+
+    async function addToLibrary(dataURL, meta){
+      const id = 'img_' + Math.random().toString(36).slice(2,9);
+      await saveImageToDB(id, dataURL, meta).catch(e=>console.error(e));
+      await refreshLibrary();
+    }
+
+    async function refreshLibrary(){
+      const items = await listImages();
+      const lib = document.getElementById('libraryList');
+      lib.innerHTML = '';
+      items.sort((a,b)=> b.created - a.created);
+      items.forEach(it=>{
+        const t = document.createElement('div'); t.className='thumb';
+        const im = document.createElement('img'); im.src = it.dataURL; im.alt = it.id;
+        const m = document.createElement('div'); m.className='meta'; m.textContent = new Date(it.created).toLocaleString();
+        t.appendChild(im); t.appendChild(m);
+        t.addEventListener('click', ()=>{ renderImageElement(it.dataURL); });
+        // right click menu for download/delete
+        t.addEventListener('contextmenu', (ev)=>{
+          ev.preventDefault();
+          const menu = document.createElement('div'); menu.style.position='fixed';menu.style.left=ev.pageX+'px';menu.style.top=ev.pageY+'px';menu.style.zIndex=9999;menu.style.background='rgba(2,6,8,0.95)';menu.style.padding='8px';menu.style.borderRadius='8px';menu.style.boxShadow='0 8px 40px rgba(0,0,0,0.8)';
+          const dl = document.createElement('div'); dl.textContent='Descargar'; dl.style.padding='6px 10px'; dl.style.cursor='pointer';
+          dl.onclick = ()=>{ downloadDataURL(it.dataURL, (it.meta && it.meta.prompt)? sanitizeFilename(it.meta.prompt): it.id); document.body.removeChild(menu); };
+          const del = document.createElement('div'); del.textContent='Borrar'; del.style.padding='6px 10px'; del.style.cursor='pointer';
+          del.onclick = async ()=>{ await deleteImageById(it.id); await refreshLibrary(); document.body.removeChild(menu); };
+          menu.appendChild(dl); menu.appendChild(del); document.body.appendChild(menu);
+          const cleanup = ()=>{ if(menu.parentNode) document.body.removeChild(menu); window.removeEventListener('click',cleanup); }
+          window.addEventListener('click',cleanup);
+        });
+        lib.appendChild(t);
+      });
+      document.getElementById('librarySummary').textContent = items.length + ' imágenes';
+      document.getElementById('libraryList').dispatchEvent(new Event('updated'));
+    }
+
+    async function deleteImageById(id){
+      const db = await openDB();
+      return new Promise((res,rej)=>{
+        const tx = db.transaction(STORE_NAME,'readwrite');
+        tx.objectStore(STORE_NAME).delete(id);
+        tx.oncomplete = ()=>res(); tx.onerror = ()=>rej(tx.error);
+      })
+    }
+
+    function downloadDataURL(dataURL, filename){
+      const a = document.createElement('a'); a.href = dataURL; a.download = sanitizeFilename(filename||'aden-image') + '.png'; document.body.appendChild(a); a.click(); a.remove();
+    }
+
+    function sanitizeFilename(s){ return s.replace(/[^a-z0-9\-_\.]/gi,'_').slice(0,60) }
+
+    // ===== Account management (local) =====
+    const avatarBtn = document.getElementById('avatarBtn');
+    const modal = document.getElementById('modal');
+    const acctNameInput = document.getElementById('acctName');
+    const acctSave = document.getElementById('acctSave');
+    const acctList = document.getElementById('acctList');
+    const acctLoad = document.getElementById('acctLoad');
+    const acctDelete = document.getElementById('acctDelete');
+    const closeModal = document.getElementById('closeModal');
+    const userGreeting = document.getElementById('userGreeting');
+
+    function loadLocalAccounts(){
+      const raw = localStorage.getItem('aden_accounts');
+      return raw ? JSON.parse(raw) : {};
+    }
+    function saveLocalAccounts(obj){ localStorage.setItem('aden_accounts', JSON.stringify(obj)); }
+
+    function refreshAccountList(){
+      const accs = loadLocalAccounts(); acctList.innerHTML='';
+      Object.keys(accs).forEach(k=>{ const o = document.createElement('option'); o.value=k; o.textContent = k; acctList.appendChild(o)});
+    }
+
+    avatarBtn.addEventListener('click', ()=>{ modal.classList.add('show'); refreshAccountList(); });
+    closeModal.addEventListener('click', ()=> modal.classList.remove('show'));
+
+    acctSave.addEventListener('click', ()=>{
+      const name = acctNameInput.value.trim(); if(!name) return alert('Pon un nombre');
+      const accs = loadLocalAccounts(); accs[name] = {name}; saveLocalAccounts(accs); refreshAccountList(); alert('Cuenta guardada localmente');
+    });
+
+    acctLoad.addEventListener('click', ()=>{
+      const k = acctList.value; if(!k) return; const accs = loadLocalAccounts(); const u = accs[k]; if(u){ userGreeting.textContent = u.name; avatarBtn.textContent = u.name[0].toUpperCase(); modal.classList.remove('show'); document.getElementById('accountName').value = u.name; }
+    });
+    acctDelete.addEventListener('click', ()=>{
+      const k = acctList.value; if(!k) return; const accs = loadLocalAccounts(); delete accs[k]; saveLocalAccounts(accs); refreshAccountList(); alert('Cuenta eliminada');
+    });
+
+    // Quick account save from sidebar
+    document.getElementById('saveAccount').addEventListener('click', ()=>{
+      const n = document.getElementById('accountName').value.trim(); if(!n) return alert('Nombre vacío');
+      const accs = loadLocalAccounts(); accs[n] = {name:n}; saveLocalAccounts(accs); alert('Cuenta guardada localmente'); userGreeting.textContent = n; avatarBtn.textContent = n[0].toUpperCase();
+    });
+
+    // ===== Generate button logic: mantenemos funcionalidad + guardamos en biblioteca =====
+    generateBtn.addEventListener('click', async ()=>{
+      const filters = {};
+      for(const k of Object.keys(selects)) filters[k] = selects[k].value;
+      const prompt = serialPrompt(filters);
+      setLoading(true);
+      try{
+        const imageUrl = await adenIA(filters); // mismo comportamiento
+        // render temporalmente la URL
+        await renderImageElement(imageUrl);
+        // Intentar convertir a dataURL y guardar en DB junto con el prompt
+        const dataURL = await fetchImageAsDataURL(imageUrl);
+        await addToLibrary(dataURL, {prompt});
+      }catch(e){ console.error(e); alert('Error al generar/guardar la imagen.'); }
+      setLoading(false);
+    });
+
+    // Descargar la imagen actualmente mostrada
+    document.getElementById('saveLocalBtn').addEventListener('click', ()=>{
+      const img = outputDiv.querySelector('img.displayed'); if(!img){ alert('No hay imagen visible'); return; }
+      const src = img.src; downloadDataURL(src, 'aden_image');
+    });
+
+    // Clear library
+    document.getElementById('clearLibrary').addEventListener('click', async ()=>{
+      if(!confirm('Borrar toda la biblioteca local?')) return; await deleteAllImages(); await refreshLibrary();
+    });
+
+    // Export all - simple: crea un archivo JSON con dataURLs
+    document.getElementById('exportAll').addEventListener('click', async ()=>{
+      const items = await listImages(); const payload = { exportedAt: Date.now(), items };
+      const data = 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(payload));
+      const a = document.createElement('a'); a.href = data; a.download = 'aden_library_export.json'; document.body.appendChild(a); a.click(); a.remove();
+    });
+
+    // Import button - user pastes a JSON file
+    document.getElementById('importBtn').addEventListener('click', ()=>{
+      const inp = document.createElement('input'); inp.type='file'; inp.accept='application/json'; inp.onchange = async (e)=>{
+        const f = e.target.files[0]; if(!f) return; const txt = await f.text(); try{ const parsed = JSON.parse(txt); if(parsed.items){ for(const it of parsed.items){ const id = it.id || ('imp_'+Math.random().toString(36).slice(2,9)); await saveImageToDB(id, it.dataURL||it.url, it.meta||{}); } alert('Importado'); refreshLibrary(); }else alert('Formato no válido'); }catch(err){ alert('Error al parsear'); }
+      }; inp.click();
+    });
+
+    // Delete by id helper is implemented earlier
+
+    // Initialize
+    (async ()=>{ await refreshLibrary();
+      // show last image if any
+      const items = await listImages(); if(items && items.length) renderImageElement(items[0].dataURL);
+      // set greeting if accountName in sidebar
+      const storedName = document.getElementById('accountName').value || '';
+      if(storedName) { userGreeting.textContent = storedName; avatarBtn.textContent = storedName[0].toUpperCase(); }
+    })();
+
+    // small helper to delete all images
+    async function deleteAllImages(){ const db = await openDB(); return new Promise((res,rej)=>{ const tx = db.transaction(STORE_NAME,'readwrite'); tx.objectStore(STORE_NAME).clear(); tx.oncomplete = ()=>res(); tx.onerror=()=>rej(tx.error); }); }
+
+  </script>
+</body>
+</html>
+
+
+
+
+
